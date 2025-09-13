@@ -1,0 +1,30 @@
+# Development Dockerfile for Node.js TypeScript backend with hot reload
+FROM node:18-alpine AS development
+
+# Install curl for healthcheck
+RUN apk add --no-cache curl
+
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json yarn.lock* ./
+RUN \
+  if [ -f yarn.lock ]; then yarn install; \
+  elif [ -f package-lock.json ]; then npm ci; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
+
+# Copy source code
+COPY . .
+
+# Create logs directory
+RUN mkdir -p logs
+
+EXPOSE 3000
+EXPOSE 9229
+
+ENV NODE_ENV=development
+ENV PORT=3000
+
+# Start the development server with debugging enabled
+CMD ["npm", "run", "dev"]

@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  # MongoDB Database (same for dev and prod)
+  mongodb:
+    image: mongo:7.0
+    restart: unless-stopped
+    container_name: realestate_mongodb_dev
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password123}
+      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME:-realestate}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data_dev:/data/db
+      - mongodb_config_dev:/data/configdb
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - realestate_network_dev
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # Backend Development Service with Hot Reload
+  backend-dev:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+      target: development
+    restart: unless-stopped
+    container_name: realestate_backend_dev
+    ports:
+      - "3000:3000"
+      - "9229:9229"  # Debug port
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-password123}@mongodb:27017/${MONGO_DB_NAME:-realestate}?authSource=admin
+      CORS_ORIGIN: http://localhost:3001
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-key}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - realestate_network_dev
+    volumes:
+      - ./backend:/app
+      - /app/node_modules  # Anonymous volume for node_modules
+      - ./backend/logs:/app/logs
+    command: npm run dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Frontend Development Service with Hot Reload
+  frontend-dev:
+    build:
+      context: ./frontend-app
+      dockerfile: Dockerfile.dev
+      target: development
+    restart: unless-stopped
+    container_name: realestate_frontend_dev
+    ports:
+      - "3001:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+      CHOKIDAR_USEPOLLING: true
+      WATCHPACK_POLLING: true
+    depends_on:
+      backend-dev:
+        condition: service_healthy
+    networks:
+      - realestate_network_dev
+    volumes:
+      - ./frontend-app:/app
+      - /app/node_modules  # Anonymous volume for node_modules
+      - /app/.next
+    command: npm run dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  mongodb_data_dev:
+    driver: local
+  mongodb_config_dev:
+    driver: local
+
+networks:
+  realestate_network_dev:
+    driver: bridge
