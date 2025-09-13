@@ -1,0 +1,51 @@
+{
+  "name": "task-backend",
+  "version": "1.0.0",
+  "description": "Node.js TypeScript backend with Express, MongoDB, and Mongoose",
+  "main": "dist/server.js",
+  "license": "MIT",
+  "keywords": [
+    "nodejs",
+    "typescript",
+    "express",
+    "mongodb",
+    "mongoose",
+    "rest-api"
+  ],
+  "author": "Your Name",
+  "scripts": {
+    "dev": "npx ts-node-dev -r tsconfig-paths/register src/server.ts",
+    "start": "node dist/server.js",
+    "build": "rm -rf dist && tsc",
+    "build:watch": "tsc --watch",
+    "start:prod": "npm run build && npm start",
+    "lint": "echo \"Linting not configured yet\"",
+    "test": "echo \"Tests not configured yet\"",
+    "clean": "rm -rf dist node_modules yarn.lock package-lock.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/mongoose": "^5.11.97",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^24.3.1",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@types/swagger-ui-express": "^4.1.8",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "joi": "^18.0.1",
+    "mongoose": "^8.18.1",
+    "morgan": "^1.10.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  }
+}
