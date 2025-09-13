@@ -157,7 +157,18 @@ yarn dev
 # Frontend will run on http://localhost:3001
 ```
 
-### 4. Access the Application
+| important note, you will need to add some data through the API using Swagger docs in http://localhost:3000/api-docs
+
+### 4. Running the application through Docker
+
+```bash
+
+docker compose up -d
+
+# Frontend will run on http://localhost:3001
+```
+
+### 5. Access the Application
 - **Frontend**: http://localhost:3001
 - **Backend API**: http://localhost:3000
 - **API Documentation**: http://localhost:3000/api-docs (when implemented)
